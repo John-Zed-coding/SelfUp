@@ -1,0 +1,31 @@
+Manifest-Version: 1.0
+Ant-Version: Apache Ant 1.9.14
+Bnd-LastModified: 1575736991076
+Bundle-ManifestVersion: 2
+Bundle-Name: tomcat-servlet-api
+Bundle-SymbolicName: org.apache.tomcat-servlet-api
+Bundle-Version: 9.0.30
+Created-By: 1.8.0_232 (AdoptOpenJDK)
+DSTAMP: 20191207
+Export-Package: javax.servlet;uses:="javax.servlet.annotation,javax.se
+ rvlet.descriptor",javax.servlet.annotation;uses:="javax.servlet",java
+ x.servlet.descriptor,javax.servlet.http;uses:="javax.servlet",javax.s
+ ervlet.resources
+Import-Package: javax.servlet,javax.servlet.annotation,javax.servlet.d
+ escriptor,org.apache.catalina.connector
+Originally-Created-By: 1.8.0_232-b09 ()
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
+TODAY: December 7 2019
+Tool: Bnd-4.2.0.201903051501
+TSTAMP: 1642
+X-Compile-Source-JDK: 8
+X-Compile-Target-JDK: 8
+
+Name: javax/servlet/
+Implementation-Title: javax.servlet
+Implementation-Vendor: Apache Software Foundation
+Implementation-Version: 4.0.FR
+Specification-Title: Java API for Servlets
+Specification-Vendor: Sun Microsystems, Inc.
+Specification-Version: 4.0
+
