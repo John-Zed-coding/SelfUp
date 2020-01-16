@@ -4,6 +4,7 @@ import zzd.com.domain.User;
 import zzd.com.utils.DashBoard;
 
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -17,6 +18,11 @@ import java.security.NoSuchAlgorithmException;
  * 按照不同的请求，调用不同方法
  */
 public class ApplicationController extends HttpServlet {
+    /*protected void doOptions(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        resp.setHeader("Access-Control-Allow-Origin", "*");
+        resp.setHeader("Access-Control-Allow-Methods","GET,POST,PUT,DELETE");
+        resp.setHeader("Access-Control-Allow-Headers", "Content-Type,Access-Token");
+    }*/
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         //乱码处理
         request.setCharacterEncoding("utf-8");
@@ -24,27 +30,37 @@ public class ApplicationController extends HttpServlet {
         //允许跨域
         response.setHeader("Access-Control-Allow-Origin", "*");
         //获取请求token
-        String token = request.getParameter("token");
-        UserModel usermodel = DashBoard.getInstance().handleAction();
-        if(0==Check(usermodel,token)){//用户初次访问
-            response.addHeader("Token",
-                    usermodel.getName()+"_"+usermodel.getToken());
-        }else if(1==Check(usermodel,token)){//超级管理员
-
-        }else{//普通用户
+        DashBoard ds = DashBoard.getInstance();
+        Cookie[] cookies = request.getCookies();
+        String token = null;
+        if(cookies==null){
+            token = "";
+        }else{
+            for(int i =0;i<cookies.length;i++){
+                if(cookies[i].getName().equals("Token")){
+                    token=cookies[i].getValue();
+                    System.out.println(cookies[i].getValue());
+                    break;
+                }else{
+                    token ="";
+                }
+                    break;
+            }
         }
-    }
-    //校验登录状态
-    public int Check(UserModel um, String token){
-        //用户未登录 - 初次访问
-        if (isNull(token)||!token.equals("NotLoginUser_"+um.getToken())||token=="null_null"){
-            System.out.println("Give new UserModel to customer");
-            return 0;
-        }else if(token.equals("SuperAdmin_"+token)){//超级管理员
-            System.out.println("Test success");
-            return 1;
-        }else//普通用户
-            return 2;
+        //调用DashBoard里的一个赋值token方法
+        UserModel userModel = ds.ckeckToken(token);//通过token获取UserModel
+        //根据UserModel实时更改Token
+        Cookie cookie = new Cookie("Token",userModel.getName()+"/"+userModel.getToken());
+        response.addCookie(cookie);
+        //注册
+        if(request.getRequestURI().contains("/register.jsp")){
+            try {
+                Register(request,response,token);
+            } catch (ServletException e) {
+                e.printStackTrace();
+            }
+        }
+        //登录
     }
     //MD5加密
     public static String getMD5(String str){
@@ -62,9 +78,9 @@ public class ApplicationController extends HttpServlet {
         return md5code;
     }
     //注册功能，首先进行权限校验
-    public void Register(HttpServletRequest request,HttpServletResponse response,UserModel um) throws ServletException, IOException, IllegalAccessException, ClassNotFoundException, InstantiationException {
+    public void Register(HttpServletRequest request,HttpServletResponse response,String token) throws ServletException, IOException {
         //当用户请求注册时：
-        if(haveRight(um.getToken())){//校验是否可以注册，这里是可以注册
+        if(haveRight(token)){//校验是否可以注册，这里是可以注册
             String username = request.getParameter("username");
             String password = request.getParameter("password");
             String password2 = request.getParameter("password2");
@@ -116,5 +132,17 @@ public class ApplicationController extends HttpServlet {
         }
         //登录用户的权限校验
         return true;
+    }
+
+    public void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+        doGet(request, response);
+    }
+    protected void doOptions(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+        response.setHeader("Access-Control-Allow-Origin", "*");
+        response.setHeader("Access-Control-Allow-Methods","GET,POST,PUT,DELETE");
+        response.setHeader("Access-Control-Allow-Headers", "Content-Type,Access-Token");
+        doGet(request,response);
     }
 }

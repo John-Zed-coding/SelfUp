@@ -31,8 +31,7 @@ public class RoleDao extends HashMap<Integer,Role>{
     //获取Authority权限数组
     public Integer[] getAuthoritiesId(int x) {
         Role o =  roles.get(x);
-        Integer[] authority = o.getAuthority();
-        return authority;
+        return o.getAuthority();
     }
 }
 

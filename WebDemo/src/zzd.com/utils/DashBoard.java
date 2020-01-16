@@ -3,12 +3,12 @@ package zzd.com.utils;
 import zzd.com.Dao.AuthorityDao;
 import zzd.com.Dao.RoleDao;
 import zzd.com.Dao.UserDao;
-import zzd.com.Login.ApplicationController;
 import zzd.com.Login.UserModel;
 import zzd.com.domain.Authority;
 import zzd.com.domain.User;
 
 import java.util.Arrays;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 饿汉式单例工厂
@@ -19,13 +19,6 @@ public class DashBoard {
     private DashBoard(){}
     //一个single实例
     private final static DashBoard single =new DashBoard();
-    //一个UserDao实例
-    private static UserDao userDao = new UserDao();
-    //一个RoleDao实例
-    private static RoleDao roleDao = new RoleDao();
-    //一个AuthorityDao实例
-    private static AuthorityDao authorityDao = new AuthorityDao();
-
     public static DashBoard getInstance(){
         if(single == null){
             synchronized (DashBoard.class){
@@ -36,33 +29,51 @@ public class DashBoard {
         }
         return single;
     }
+    //一个UserDao实例
+    private static UserDao userDao = new UserDao();
+    //一个RoleDao实例
+    private static RoleDao roleDao = new RoleDao();
+    //一个AuthorityDao实例
+    private static AuthorityDao authorityDao = new AuthorityDao();
+    //存放一个token对应UserModel的hashMap
+    private static ConcurrentHashMap<String,UserModel> tokenMap = new ConcurrentHashMap<>();
     /**
      * 前端控制器拦截请求
-     * @param
-     * @return
+     *
      */
-    public UserModel handleAction() {
-        //反射UserModel对象
-        if(ApplicationController.isNull(UserDao.getUserMsg().getUsername())){
-            return single.getUserModel();//未登录则创建对象实例
-        }else
-            return UserModel.getUsermodel();//已登录则通过反射创建对象
-    }
-    private UserModel getUserModel(){
-        Integer[] ids = roleDao.getAuthoritiesId(0);//这是未登录用户
+    public UserModel handleAction(int i) {
+        Integer[] ids = roleDao.getAuthoritiesId(i);
         System.out.println(Arrays.toString(ids));
-        Authority[] Authority = authorityDao.getAuthorities(ids);
-        UserModel uM = new UserModel(Authority);
+        Authority[] authority = authorityDao.getAuthorities(ids);
+        UserModel uM = new UserModel(authority);
+        tokenMap.put(uM.getName()+"/"+uM.getToken(),uM);
+        System.out.println("Put Those things As UserModel Name:"+uM.getName()+"/"+uM.getToken());
         return uM;
     }
-
     public void registUser(User user) {
         boolean flag = userDao.searchUserByUsername(user.getUsername());
         if(flag){
             System.out.println("同户名已存在");
         }else{
-            new UserModel(authorityDao.getAuthorities(user.getRoles()));
+            UserModel.getUsermodel(authorityDao.getAuthorities(user.getRoles()));
             userDao.addUser(user);
+        }
+    }
+
+    //传进来的token是usermodel.getName()+"/"+usermodel.getToken()或者""
+    public UserModel ckeckToken(String token) {
+        //System.out.println("Here The Coming in Token is:"+token);
+        if (token.equals("")){
+            System.out.println("Give new UserModel to customer");
+            return single.handleAction(0);
+        }else if(token.contains("NotLoginUser")){
+            System.out.println("Run Here Where NotLoginUser Is Coming::"+token);
+            return tokenMap.get(token);
+        }else if(token.equals("SuperAdmin"+token)){//超级管理员
+            return tokenMap.get(token);
+        }else{
+            System.out.println("Something is Wrong");
+            return single.handleAction(0);
         }
     }
 }
