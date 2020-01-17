@@ -59,10 +59,7 @@ public class DashBoard {
             userDao.addUser(user);
         }
     }
-
-    //传进来的token是usermodel.getName()+"/"+usermodel.getToken()或者""
     public UserModel ckeckToken(String token) {
-        //System.out.println("Here The Coming in Token is:"+token);
         if (token.equals("")){
             System.out.println("Give new UserModel to customer");
             return single.handleAction(0);

@@ -127,13 +127,13 @@ public class ApplicationController extends HttpServlet {
     private static boolean haveRight(String token){
         //首先将用户名和UserDao中存储的用户名做校验，确定用户登录状态
         //未登录用户的权限校验
-        if(token.contains("NotLoginUser_")){//未登录用户
-
-        }
-        //登录用户的权限校验
-        return true;
+        if(token.contains("NotLoginUser")){//未登录用户
+            return true;
+        }else if(token.contains("SuperAdmin")){//登录用户的权限校验
+            return true;
+        }else
+            return false;
     }
-
     public void doPost(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
         doGet(request, response);
