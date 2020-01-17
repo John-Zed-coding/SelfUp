@@ -8,9 +8,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * 定义用户信息
  */
 public class UserDao {
+    private static User userMsg;
     private static ConcurrentHashMap<String, User> userMap = new ConcurrentHashMap();
-    private static User userMsg = new User();
-
     public static ConcurrentHashMap<String, User> getUserMap() {
         return userMap;
     }

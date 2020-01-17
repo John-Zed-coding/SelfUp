@@ -9,9 +9,8 @@ import java.util.HashMap;
  *
  */
 public class RoleDao extends HashMap<Integer,Role>{
-    //roles是存放角色信息的哈希表，存放了Role的实例
-    private static HashMap<Integer,Role> roles = new HashMap();
     private static Role ro = new Role();
+    private static HashMap<Integer,Role> roles = new HashMap();
     static {
         ro.setId(0);
         ro.setUsername("UserNotLogin");

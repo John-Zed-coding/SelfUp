@@ -29,7 +29,7 @@ public class ApplicationController extends HttpServlet {
         response.setContentType("text/html;charset=utf-8");
         //允许跨域
         response.setHeader("Access-Control-Allow-Origin", "*");
-        //获取请求token
+        //从cookie中获取请求token
         DashBoard ds = DashBoard.getInstance();
         Cookie[] cookies = request.getCookies();
         String token = null;
@@ -39,7 +39,7 @@ public class ApplicationController extends HttpServlet {
             for(int i =0;i<cookies.length;i++){
                 if(cookies[i].getName().equals("Token")){
                     token=cookies[i].getValue();
-                    System.out.println(cookies[i].getValue());
+                    //System.out.println(cookies[i].getValue());
                     break;
                 }else{
                     token ="";
@@ -51,6 +51,7 @@ public class ApplicationController extends HttpServlet {
         UserModel userModel = ds.ckeckToken(token);//通过token获取UserModel
         //根据UserModel实时更改Token
         Cookie cookie = new Cookie("Token",userModel.getName()+"/"+userModel.getToken());
+        System.out.println("Cookie has value like this:"+cookie.getValue());
         response.addCookie(cookie);
         //注册
         if(request.getRequestURI().contains("/register.jsp")){
@@ -80,7 +81,7 @@ public class ApplicationController extends HttpServlet {
     //注册功能，首先进行权限校验
     public void Register(HttpServletRequest request,HttpServletResponse response,String token) throws ServletException, IOException {
         //当用户请求注册时：
-        if(haveRight(token)){//校验是否可以注册，这里是可以注册
+        if(DashBoard.getInstance().haveRight(token)){//校验是否可以注册，这里是可以注册
             String username = request.getParameter("username");
             String password = request.getParameter("password");
             String password2 = request.getParameter("password2");
@@ -123,17 +124,7 @@ public class ApplicationController extends HttpServlet {
     }
     //非空校验
     public static boolean isNull(String str){return str ==null||"".equals(str);}
-    //权限校验
-    private static boolean haveRight(String token){
-        //首先将用户名和UserDao中存储的用户名做校验，确定用户登录状态
-        //未登录用户的权限校验
-        if(token.contains("NotLoginUser")){//未登录用户
-            return true;
-        }else if(token.contains("SuperAdmin")){//登录用户的权限校验
-            return true;
-        }else
-            return false;
-    }
+
     public void doPost(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
         doGet(request, response);

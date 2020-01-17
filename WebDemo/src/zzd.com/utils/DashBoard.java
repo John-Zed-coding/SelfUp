@@ -47,7 +47,7 @@ public class DashBoard {
         Authority[] authority = authorityDao.getAuthorities(ids);
         UserModel uM = new UserModel(authority);
         tokenMap.put(uM.getName()+"/"+uM.getToken(),uM);
-        System.out.println("Put Those things As UserModel Name:"+uM.getName()+"/"+uM.getToken());
+        System.out.println("Put Those things As tokenMap Name:"+uM.getName()+"/"+uM.getToken());
         return uM;
     }
     public void registUser(User user) {
@@ -56,7 +56,7 @@ public class DashBoard {
             System.out.println("同户名已存在");
         }else{
             UserModel.getUsermodel(authorityDao.getAuthorities(user.getRoles()));
-            userDao.addUser(user);
+            userDao.addUser(user);//应该保存token和user的对应关系
         }
     }
     public UserModel ckeckToken(String token) {
@@ -66,11 +66,25 @@ public class DashBoard {
         }else if(token.contains("NotLoginUser")){
             System.out.println("Run Here Where NotLoginUser Is Coming::"+token);
             return tokenMap.get(token);
-        }else if(token.equals("SuperAdmin"+token)){//超级管理员
+        }else if(token.contains("SuperAdmin")){//超级管理员
+            return tokenMap.get(token);
+        }else if(token.contains("NormalUser")){
+            System.out.println("Yet To Coding");
             return tokenMap.get(token);
         }else{
             System.out.println("Something is Wrong");
             return single.handleAction(0);
         }
+    }
+    //权限校验
+    public boolean haveRight(String token){
+        //首先将用户名和UserDao中存储的用户名做校验，确定用户登录状态
+        //未登录用户的权限校验
+        if(token.contains("NotLoginUser")){//未登录用户
+            return true;
+        }else if(token.contains("SuperAdmin")){//登录用户的权限校验
+            return true;
+        }else
+            return false;
     }
 }
