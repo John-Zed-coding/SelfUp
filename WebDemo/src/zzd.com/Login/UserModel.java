@@ -2,6 +2,8 @@ package zzd.com.Login;
 
 import zzd.com.Dao.UserDao;
 import zzd.com.domain.Authority;
+import zzd.com.domain.User;
+import zzd.com.utils.DashBoard;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -30,24 +32,14 @@ public class UserModel {
     }
 
     //通过反射对外提供无参构造
-    public static UserModel getUsermodel(Authority[] aa) {
+    public static UserModel getUsermodel(User aa) {
         UserModel usermodel = null;
         try{
             Constructor<UserModel> constructor = UserModel.class.getConstructor(String.class,String.class);
             constructor.setAccessible(true);
-            usermodel = constructor.newInstance("","");
-            for(int i=0;i<aa.length;i++){
-                s+=aa[i].getMethodName()+"/";
-            }
-            usermodel.setToken(s);
-            if (3==aa.length){
-                usermodel.setName(UserDao.getUserMsg().getUsername());
-            }else if(17==aa.length){
-                usermodel.setName(UserDao.getUserMsg().getUsername());
-            }
-            /*Class c = Class.forName("zzd.com.Login.UserModel");
-            Constructor constructor = c.getConstructor(Authority[].class);
-            usermodel = (UserModel) constructor.newInstance();*/
+            aa.setToken(getRandomToken());
+            usermodel = constructor.newInstance(aa.getUsername(),aa.getToken());
+            //settoken信息
         } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
             e.printStackTrace();
         }
@@ -57,7 +49,7 @@ public class UserModel {
         this.name = name;
     }
     public String getToken() {
-        if(ApplicationController.isNull(token)){
+        if(DashBoard.isNull(token)){
             return "";
         }else{
             return token;

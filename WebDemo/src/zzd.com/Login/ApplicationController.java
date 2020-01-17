@@ -47,7 +47,6 @@ public class ApplicationController extends HttpServlet {
                     break;
             }
         }
-        //调用DashBoard里的一个赋值token方法
         UserModel userModel = ds.ckeckToken(token);//通过token获取UserModel
         //根据UserModel实时更改Token
         Cookie cookie = new Cookie("Token",userModel.getName()+"/"+userModel.getToken());
@@ -56,75 +55,16 @@ public class ApplicationController extends HttpServlet {
         //注册
         if(request.getRequestURI().contains("/register.jsp")){
             try {
-                Register(request,response,token);
+                ds.register(request,response,userModel);
             } catch (ServletException e) {
                 e.printStackTrace();
             }
         }
         //登录
-    }
-    //MD5加密
-    public static String getMD5(String str){
-        byte[] secretBytes ;
-        try {
-            secretBytes = MessageDigest.getInstance("md5").digest(
-                    str.getBytes());
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("没有md5这个算法！");
-        }
-        String md5code = new BigInteger(1, secretBytes).toString(16);
-        for (int i = 0; i < 32 - md5code.length(); i++) {
-            md5code = "0" + md5code;
-        }
-        return md5code;
-    }
-    //注册功能，首先进行权限校验
-    public void Register(HttpServletRequest request,HttpServletResponse response,String token) throws ServletException, IOException {
-        //当用户请求注册时：
-        if(DashBoard.getInstance().haveRight(token)){//校验是否可以注册，这里是可以注册
-            String username = request.getParameter("username");
-            String password = request.getParameter("password");
-            String password2 = request.getParameter("password2");
-            String nickname = request.getParameter("nickname");
-            String email = request.getParameter("email");
-            Integer[] roles = new Integer[]{0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16};
-            if(isNull(username)){
-                request.setAttribute("msg","用户名不能为空");
-                request.getRequestDispatcher("/regist.jsp").forward(request, response);
-                return;
-            }
-            if(isNull(password)){
-                request.setAttribute("msg","密码不能为空");
-                request.getRequestDispatcher("/regist.jsp").forward(request, response);
-                return;
-            }
-            if(isNull(password2)&&!password.equals(password2)){
-                request.setAttribute("msg","用户名不能为空，且必须和第一次输入的一样");
-                request.getRequestDispatcher("/regist.jsp").forward(request, response);
-                return;
-            }
-            if(isNull(nickname)){
-                request.setAttribute("msg","昵称不能为空");
-                request.getRequestDispatcher("/regist.jsp").forward(request, response);
-                return;
-            }
-            String reg = "\\w+@\\w+(\\.\\w+)+";//邮箱格式
-            if(isNull(email)&&!email.matches(reg)){
-                request.setAttribute("msg","请输入正确的邮箱格式");
-                request.getRequestDispatcher("/regist.jsp").forward(request, response);
-                return;
-            }
-            User user = new User(username, getMD5(password), nickname, email, "",
-                    roles, request.getHeader("x-forwarded-for"), null,
-                    null, request.getParameter("date"), false);
-            DashBoard.getInstance().registUser(user);
-        }else{//没有注册权限
-            System.out.println("您没有注册权限，详情请联系管理员");
+        if(request.getRequestURI().contains("/login.jsp")){
+            ds.login(request,response,userModel);
         }
     }
-    //非空校验
-    public static boolean isNull(String str){return str ==null||"".equals(str);}
-
     public void doPost(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
         doGet(request, response);
