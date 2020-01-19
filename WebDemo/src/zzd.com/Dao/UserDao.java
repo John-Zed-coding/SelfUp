@@ -36,6 +36,6 @@ public class UserDao {
         }
     }
     public void addUser(User user) {
-        userMap.put(user.getToken(),user);
+        userMap.put(user.getUsername(),user);
     }
 }

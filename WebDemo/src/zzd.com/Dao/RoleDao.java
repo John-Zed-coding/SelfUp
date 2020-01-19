@@ -8,7 +8,21 @@ import java.util.HashMap;
  * 定义三个Role
  *
  */
-public class RoleDao extends HashMap<Integer,Role>{
+public class RoleDao {
+    /*private Integer id;
+    private String username;
+    private Integer[] Authority;
+    private String describe;*/
+    //统一的set方法
+    /*public void set(String name ,String value){
+        switch (name){
+            case "username":
+                this.username=value;
+                break;
+            case "describe":
+                this.describe=value;
+        }
+    }*/
     private static Role ro = new Role();
     private static HashMap<Integer,Role> roles = new HashMap();
     static {

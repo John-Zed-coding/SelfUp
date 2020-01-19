@@ -39,15 +39,14 @@ public class ApplicationController extends HttpServlet {
             for(int i =0;i<cookies.length;i++){
                 if(cookies[i].getName().equals("Token")){
                     token=cookies[i].getValue();
-                    //System.out.println(cookies[i].getValue());
                     break;
                 }else{
                     token ="";
                 }
                     break;
             }
-        }
-        UserModel userModel = ds.ckeckToken(token);//通过token获取UserModel
+        }//通过token获取UserModel
+        UserModel userModel = ds.ckeckToken(token);
         //根据UserModel实时更改Token
         Cookie cookie = new Cookie("Token",userModel.getName()+"/"+userModel.getToken());
         System.out.println("Cookie has value like this:"+cookie.getValue());

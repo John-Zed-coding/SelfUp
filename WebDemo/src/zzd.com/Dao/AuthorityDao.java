@@ -4,7 +4,15 @@ import zzd.com.domain.Authority;
 
 import java.util.HashMap;
 
+/**
+ * 需要定义Authority的属性，并且封装成Authority
+ * 权限名就是判断用户
+ */
 public class AuthorityDao{
+    private String requireName ;//页面名或者操作功能名
+    private String httpMethod;//请求操作
+    private String methodName;//权限名
+    private String describe;
     private static Authority auth;
     private static HashMap<Integer,Authority> an = new HashMap();
     static String[] s = new String[]{"UserLogIn","UserLogOut","GetAuthorityList",

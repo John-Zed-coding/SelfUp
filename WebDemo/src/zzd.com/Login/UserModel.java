@@ -15,13 +15,14 @@ import java.util.concurrent.ConcurrentHashMap;
  * 反射创建对象
  */
 public class UserModel {
-    private String name;//
+    private String name;
     private String token;
-    static String s = "";
+    //private UserDao user = new UserDao();
     //存放一份hashmap
-    private static ConcurrentHashMap<String, String> um = new ConcurrentHashMap<String, String>();
+    private ConcurrentHashMap<String, String> um = new ConcurrentHashMap<String, String>();
     //为初次访问的用户创建新的UserModel对象
     public UserModel(Authority[] aa) {
+        String s = "";
         for(int i=0;i<aa.length;i++){
             s+=aa[i].getMethodName()+"/";
         }
@@ -37,7 +38,6 @@ public class UserModel {
         try{
             Constructor<UserModel> constructor = UserModel.class.getConstructor(String.class,String.class);
             constructor.setAccessible(true);
-            aa.setToken(getRandomToken());
             usermodel = constructor.newInstance(aa.getUsername(),aa.getToken());
             //settoken信息
         } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {

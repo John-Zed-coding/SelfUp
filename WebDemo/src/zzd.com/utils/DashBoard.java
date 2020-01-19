@@ -48,19 +48,21 @@ public class DashBoard {
      * 前端控制器拦截请求
      *
      */
-    public UserModel handleAction(int i) {
-        Integer[] ids = roleDao.getAuthoritiesId(i);
+    public UserModel handleAction() {
+        Integer[] ids = roleDao.getAuthoritiesId(0);
         System.out.println(Arrays.toString(ids));
         Authority[] authority = authorityDao.getAuthorities(ids);
         UserModel uM = new UserModel(authority);
+        //这里的userModel是一个新的
         tokenMap.put(uM.getName()+"/"+uM.getToken(),uM);
-        System.out.println("Put Those things As tokenMap Name:"+uM.getName()+"/"+uM.getToken());
+        //System.out.println("Put Those things As tokenMap Name:"+uM.getName()+"/"+uM.getToken());
         return uM;
     }
     public void registUser(User user) {
         boolean flag = userDao.searchUserByUsername(user.getUsername());
         if(!flag){
-            UserModel.getUsermodel(user);
+            UserModel newModel = UserModel.getUsermodel(user);
+            tokenMap.put(user.getUsername()+"/"+user.getToken(),newModel);//存到token和usermodel对应的表中，在登录时可以直接查找
             userDao.addUser(user);//应该保存token和user的对应关系
         }else{
             System.out.println("同户名已存在");
@@ -69,35 +71,31 @@ public class DashBoard {
 
     /**
      * 检查用户权限，决定UserModel的创建方式
-     * @param token
+     * @param token=userModel.name+userModel.token
      * @return
      */
     public UserModel ckeckToken(String token) {
         if (token.equals("")){
             System.out.println("Give new UserModel to customer");
-            return single.handleAction(0);
+            return single.handleAction();
         }else if(token.contains("NotLoginUser")){
             System.out.println("Run Here Where NotLoginUser Is Coming::"+token);
             return tokenMap.get(token);
-        }else if(token.contains("SuperAdmin")){//超级管理员
+        }else{//只有普通用户和超级管理员的可能
+            System.out.println("Go On Boy");
             return tokenMap.get(token);
-        }else if(token.contains("NormalUser")){
-            System.out.println("Yet To Coding");
-            return tokenMap.get(token);
-        }else{
-            System.out.println("Something is Wrong");
-            return single.handleAction(0);
         }
     }
-    //权限校验，可以和上面的整合
+    //注册权限校验
     public boolean haveRight(String token){
         //首先将用户名和UserDao中存储的用户名做校验，确定用户登录状态
         //未登录用户的权限校验
         if(token.contains("NotLoginUser")){//未登录用户
             return true;
-        }else if(token.contains("SuperAdmin")){//登录用户的权限校验
+        }else if(!(tokenMap.containsKey(token))){//登录用户的权限校验
             return true;
         }else
+            System.out.println("您已注册过，请登录");
             return false;
     }
     //注册功能，首先进行权限校验
@@ -136,7 +134,7 @@ public class DashBoard {
                 request.getRequestDispatcher("/regist.jsp").forward(request, response);
                 return;
             }
-            User user = new User(username, getMD5(password), nickname, email, "",
+            User user = new User(username, getMD5(password), nickname, email, um.getToken(),
                     roles, request.getHeader("x-forwarded-for"), null,
                     null, request.getParameter("date"), false);
             single.registUser(user);
